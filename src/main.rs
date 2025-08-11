@@ -35,7 +35,37 @@ fn format_size(bytes: usize) -> String {
 }
 
 fn write_markdown_table(results: &[BenchmarkResult]) -> Result<()> {
-    let mut file = File::create("results.md")?;
+    let mut file = File::create("README.md")?;
+
+    let mut best_by_file_size: HashMap<usize, &BenchmarkResult> = HashMap::new();
+
+    for r in results {
+        best_by_file_size
+            .entry(r.file_size)
+            .and_modify(|best| {
+                if r.total_time < best.total_time {
+                    *best = r;
+                }
+            })
+            .or_insert(r);
+    }
+
+    writeln!(file, "# Summary: Best Configs Per File Size\n")?;
+
+    for (size, result) in best_by_file_size.iter().sorted_by_key(|(k, _)| *k) {
+        writeln!(
+            file,
+            "- **{}** → `{}` shard size, `{}` shards ({} original + {} recovery) → Total: {}, Encode: {}, Decode: {}",
+            format_size(*size),
+            format_size(result.shard_size),
+            result.original_shards + result.recovery_shards,
+            result.original_shards,
+            result.recovery_shards,
+            format_duration(result.total_time),
+            format_duration(result.encode_time),
+            format_duration(result.decode_time),
+        )?;
+    }
 
     writeln!(
         file,
@@ -70,36 +100,6 @@ fn write_markdown_table(results: &[BenchmarkResult]) -> Result<()> {
             format_duration(r.total_time),
             enc_tput,
             dec_tput,
-        )?;
-    }
-
-    let mut best_by_file_size: HashMap<usize, &BenchmarkResult> = HashMap::new();
-
-    for r in results {
-        best_by_file_size
-            .entry(r.file_size)
-            .and_modify(|best| {
-                if r.total_time < best.total_time {
-                    *best = r;
-                }
-            })
-            .or_insert(r);
-    }
-
-    writeln!(file, "# Summary: Best Configs Per File Size\n")?;
-
-    for (size, result) in best_by_file_size.iter().sorted_by_key(|(k, _)| *k) {
-        writeln!(
-            file,
-            "- **{}** → `{}` shard size, `{}` shards ({} original + {} recovery) → Total: {}, Encode: {}, Decode: {}",
-            format_size(*size),
-            format_size(result.shard_size),
-            result.original_shards + result.recovery_shards,
-            result.original_shards,
-            result.recovery_shards,
-            format_duration(result.total_time),
-            format_duration(result.encode_time),
-            format_duration(result.decode_time),
         )?;
     }
 

@@ -28,6 +28,7 @@ pub fn generate_configs() -> Vec<Config> {
         (MB, "1MB"),
         (2 * MB, "2MB"),
         (4 * MB, "4MB"),
+        (55 * MB, "55MB"),
     ];
 
     // (original, recovery) shard count pairs
