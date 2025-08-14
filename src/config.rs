@@ -12,18 +12,9 @@ pub struct Config {
 }
 
 pub fn generate_configs() -> Vec<Config> {
-    let file_sizes = [
-        (128 * MB, "128MB"),
-        (256 * MB, "256MB"),
-        (512 * MB, "512MB"),
-        (GB, "1GB"),
-        (2 * GB, "2GB"),
-        (4 * GB, "4GB"),
-    ];
+    let file_sizes = [(512 * MB, "512MB"), (GB, "1GB"), (2 * GB, "2GB")];
 
     let shard_sizes = [
-        (128 * KB, "128KB"),
-        (256 * KB, "256KB"),
         (512 * KB, "512KB"),
         (MB, "1MB"),
         (2 * MB, "2MB"),

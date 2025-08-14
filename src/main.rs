@@ -5,6 +5,7 @@ use std::time::Duration;
 
 use anyhow::Result;
 use itertools::Itertools;
+use reed_solomon::format_size;
 
 use crate::benchmark::{BenchmarkResult, benchmark_config};
 use crate::config::generate_configs;
@@ -22,15 +23,6 @@ fn format_duration(dur: Duration) -> String {
         format!("{:.2} ms", secs * 1000.0)
     } else {
         format!("{secs:.2} s")
-    }
-}
-
-fn format_size(bytes: usize) -> String {
-    match bytes {
-        b if b >= 1 << 30 => format!("{:.1} GB", b as f64 / (1 << 30) as f64),
-        b if b >= 1 << 20 => format!("{:.1} MB", b as f64 / (1 << 20) as f64),
-        b if b >= 1 << 10 => format!("{:.1} KB", b as f64 / (1 << 10) as f64),
-        _ => format!("{bytes} B"),
     }
 }
 
@@ -66,6 +58,8 @@ fn write_markdown_table(results: &[BenchmarkResult]) -> Result<()> {
             format_duration(result.decode_time),
         )?;
     }
+
+    writeln!(file, "\n# Benchmark Results\n")?;
 
     writeln!(
         file,
